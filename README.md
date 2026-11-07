@@ -1,6 +1,6 @@
 <p align="center"><img src="docs/img/banner.svg" width="100%" alt="Acoustic Mosquito Detection &amp; Localization"></p>
 
-<p align="center"><img src="https://img.shields.io/badge/LaTeX-IEEEtran-008080"> <img src="https://img.shields.io/badge/Topic-DSP%20%7C%20DoA-1f6feb"> <img src="https://img.shields.io/badge/Deep%20Learning-HumBugDB-orange"> <img src="https://img.shields.io/badge/FPGA-acceleration-informational"> <img src="https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey"></p>
+<p align="center"><img src="https://img.shields.io/badge/Year-2025-555"> <img src="https://img.shields.io/badge/LaTeX-IEEEtran-008080"> <img src="https://img.shields.io/badge/Topic-DSP%20%7C%20DoA-1f6feb"> <img src="https://img.shields.io/badge/Deep%20Learning-HumBugDB-orange"> <img src="https://img.shields.io/badge/FPGA-acceleration-informational"> <img src="https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey"></p>
 <p align="center"><a href="#english">English</a> · <a href="#español">Español</a></p>
 
 <h1 align="center">Acoustic Detection and Localization of Mosquitoes: Classical DSP to Hybrid FPGA/Deep-Learning Pipelines</h1>
