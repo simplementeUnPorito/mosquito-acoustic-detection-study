@@ -7,6 +7,8 @@
 
 ## English
 
+> **Status: on hold.** Personal research project started to find practical ways to detect and count mosquitoes by sound. It is paused; part of the original files and progress were lost, so this repository keeps the literature study and the simulations that survived.
+
 ### Overview
 Mosquitoes transmit diseases such as dengue, Zika and malaria, and acoustic monitoring is a low-cost, non-invasive way to detect and track them. This independent study (IEEEtran, 13 pages, written in Spanish) traces the path from classical signal processing to hybrid pipelines: phase-locked loops and matched filters for detection, direction-of-arrival (DoA) estimation for localization, convolutional and Bayesian neural networks for robustness to noise, and FPGA accelerators as the route to real-time, on-board deployment (drones, IoT nodes). The contribution is a decision-oriented synthesis: how to choose a technology according to the operational goal (surveillance vs. interception), the acoustic conditions and the computational budget.
 
@@ -64,6 +66,9 @@ Elías David Álvarez Martínez, Electronics Engineering, Universidad Católica 
 Text and the author's own figures: CC BY 4.0 (see `LICENSE`). Figures reproduced from cited literature remain the property of their sources. Code, if added: MIT.
 
 ## Español
+
+> **Estado: en pausa.** Proyecto personal de investigación para encontrar formas prácticas de detectar y contar mosquitos por sonido. Quedó congelado y se perdieron parte de los archivos y avances; este repositorio conserva el estudio bibliográfico y las simulaciones que sobrevivieron.
+
 
 ### Descripción
 Los mosquitos transmiten enfermedades como dengue, zika y malaria, y el monitoreo acústico es una alternativa de bajo costo y no invasiva para detectarlos y seguirlos. Esta revisión de autoría individual (IEEEtran, 13 páginas, en español) recorre el camino desde el procesamiento de señales clásico hasta pipelines híbridos: PLL y filtros casados para detección, estimación de dirección de arribo (DoA) para localización, redes convolucionales y bayesianas para ganar robustez ante el ruido, y aceleradores FPGA como vía hacia la implementación en tiempo real a bordo (drones, nodos IoT). El aporte es una síntesis orientada a decisiones: criterios para elegir tecnología según el objetivo operativo (vigilancia vs. intercepción), las condiciones acústicas y el presupuesto computacional.
