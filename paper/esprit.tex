@@ -1,0 +1,60 @@
+\subsection{ESPRIT (Estimation of Signal Parameters via Rotational Invariance Techniques)}\label{sec:doa:esprit}
+
+El algoritmo \textbf{ESPRIT} es una alternativa a MUSIC que evita el barrido angular.  
+En lugar de calcular un espectro y buscar picos, se apoya en la 
+\textbf{invariancia rotacional} entre subarreglos de un ULA (Uniform Linear Array).  
+Esto permite estimar directamente las direcciones de arribo resolviendo un problema algebraico \cite{Gupta2015}.
+
+\subsubsection*{Idea general}
+\begin{itemize}
+	\item Se divide el arreglo de $M$ sensores en dos subarreglos idénticos, 
+	desplazados por una distancia fija $\Delta x$.  
+	\item La señal en el segundo subarreglo es equivalente a la del primero, 
+	multiplicada por un factor de fase dependiente del ángulo de arribo.  
+	\item Esta relación se modela como una \textbf{invariancia rotacional}, 
+	lo que permite estimar los ángulos a partir de los autovalores de una matriz reducida.  
+\end{itemize}
+
+Mientras que MUSIC “escanea” ángulo por ángulo para detectar picos,  
+ESPRIT utiliza propiedades algebraicas del arreglo y evita la búsqueda explícita.
+
+\subsubsection*{Características}
+\begin{itemize}
+	\item No requiere barrido angular, reduciendo la complejidad frente a MUSIC.  
+	\item Menor tiempo de cálculo y menos sensible a discretización de ángulos.  
+	\item Exige que el arreglo posea subestructuras desplazadas (ej. ULA).  
+	\item Sensible a errores de calibración o desviaciones geométricas.  
+\end{itemize}
+
+\subsubsection*{Formulación matemática}
+
+Dividiendo el arreglo en dos subarreglos, las señales medidas se modelan como:
+\begin{equation}
+	\mathbf{u}_0(t) = A\, \mathbf{s}(t) + \mathbf{n}_0(t), 
+	\qquad 
+	\mathbf{u}_1(t) = A \Phi \mathbf{s}(t) + \mathbf{n}_1(t),
+\end{equation}
+donde $A$ es la matriz de steering del primer subarreglo, 
+y $\Phi$ una matriz diagonal de factores de fase:
+\[
+\Phi = \mathrm{diag}\left(e^{j\gamma_1}, e^{j\gamma_2}, \dots, e^{j\gamma_L}\right), 
+\qquad \gamma_l = \frac{2\pi}{\lambda}\, \Delta x \cos\varphi_l.
+\]
+
+A partir del subespacio de señal $V_s$, se extraen dos bloques $V_0$ y $V_1$ 
+correspondientes a cada subarreglo.  
+La relación de invariancia se expresa como:
+\begin{equation}
+	V_1 \approx V_0 \Psi,
+\end{equation}
+donde $\Psi$ es una matriz de rotación que contiene la información angular.
+
+Los autovalores de $\Psi$ son:
+\[
+\exp(j \gamma_l) = e^{j \tfrac{2\pi}{\lambda}\, \Delta x \cos\varphi_l},
+\]
+a partir de los cuales se obtiene directamente la estimación de los ángulos:
+\begin{equation}
+	\hat{\varphi}_l = \cos^{-1}\!\left( \frac{\lambda}{2\pi \Delta x} \, \angle(e^{j \gamma_l}) \right), 
+	\quad l=0,\dots,L-1.
+\end{equation}

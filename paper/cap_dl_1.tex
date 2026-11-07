@@ -1,0 +1,65 @@
+\subsection{Contextos matemáticos y preprocesamiento}
+\label{sec:dl_preproc}
+
+El análisis de señales acústicas mediante \emph{Deep Learning} requiere transformar el audio crudo en representaciones que capturen adecuadamente sus propiedades espectrales y temporales.  
+Para ello se emplean herramientas de la teoría de Fourier y representaciones perceptuales que aproximan el comportamiento del sistema auditivo humano.  
+En lo que sigue se presentan las bases matemáticas de tres transformaciones fundamentales: la Transformada Rápida de Fourier (FFT), la Transformada de Fourier de Tiempo Corto (STFT) y la escala Mel.
+
+\subsubsection{Transformada Rápida de Fourier (FFT)}
+
+Dada una señal discreta $x[n]$ de longitud $N$, su Transformada Discreta de Fourier (DFT) está definida como
+\begin{equation}
+	X[k] = \sum_{n=0}^{N-1} x[n] \, e^{-j \tfrac{2\pi}{N} kn}, 
+	\quad k = 0,1,\dots,N-1.
+	\label{eq:dft}
+\end{equation}
+
+La DFT descompone la señal en senoidales complejas ortogonales, revelando la distribución de energía en frecuencia \cite{Haykin2001,Proakis2007}.  
+Su cálculo directo tiene costo $\mathcal{O}(N^2)$, pero el algoritmo FFT lo reduce a $\mathcal{O}(N \log N)$, habilitando aplicaciones en tiempo real como detección acústica.  
+
+Es importante notar que la DFT brinda una descripción global: indica magnitud y fase de cada componente frecuencial, pero pierde información sobre el instante en que ocurrió.  
+En bioacústica esto es relevante: el zumbido de un mosquito puede variar en fracciones de segundo, lo que motiva el uso de representaciones con resolución conjunta en tiempo y frecuencia.
+
+\insertarfigura{fig/fft_signal.png}
+{Conversión de una señal temporal a su representación espectral mediante FFT.}
+{fig:fft_signal}{1}
+
+\subsubsection{Transformada de Fourier de Tiempo Corto (STFT)}
+
+La STFT extiende la DFT incorporando localización temporal.  
+La señal se multiplica por una ventana $w[n]$ de duración finita, que selecciona un segmento, y se desplaza en el tiempo mediante un parámetro $m$. Su definición es:
+\begin{equation}
+	X(m,\omega) = \sum_{n=-\infty}^{\infty} x[n] \, w[n-m] \, e^{-j \omega n}.
+	\label{eq:stft}
+\end{equation}
+
+El resultado es una función bidimensional que describe cómo varía el contenido espectral en el tiempo, dando lugar al \emph{espectrograma}.  
+La resolución temporal y frecuencial dependen inversamente de la longitud de la ventana:  
+ventanas cortas capturan sucesos breves pero con poca resolución espectral, mientras que ventanas largas ofrecen buena resolución en frecuencia pero pierden detalle temporal.  
+Esta dualidad, conocida como principio de incertidumbre tiempo–frecuencia, condiciona el diseño del preprocesamiento \cite{Bancroft2002}.  
+
+En detección de mosquitos, la STFT permite observar la evolución dinámica del zumbido, que puede variar en frecuencia fundamental por el movimiento del insecto o por interferencias ambientales.
+
+\insertarfigura{fig/stft_spectrogram.png}
+{Esquema de la STFT mostrando segmentación por ventanas.}
+{fig:stft_spectrogram}{1}
+
+\subsubsection{Escala Mel}
+
+Aunque la STFT proporciona un espectro en Hz, el sistema auditivo humano no percibe las frecuencias de manera lineal.  
+Somos más sensibles a bajas frecuencias: diferenciar entre 100 y 200 Hz resulta más fácil que entre 5000 y 5100 Hz.  
+Para aproximar esta percepción se usa la escala Mel, que relaciona la frecuencia física $f$ con una perceptual $f_{\text{mel}}$:
+\begin{equation}
+	f_{\text{mel}} = 2595 \, \log_{10}\!\left( 1 + \frac{f}{700} \right).
+	\label{eq:mel}
+\end{equation}
+
+El cálculo de un \emph{mel-spectrograma} consiste en aplicar un banco de filtros triangulares, distribuidos equidistantemente en la escala Mel, sobre el espectrograma lineal.  
+La energía espectral se proyecta a un dominio perceptual comprimido, reduciendo dimensionalidad e introduciendo cierta invariancia frente a variaciones irrelevantes para el oído humano.  
+
+En \emph{Deep Learning} aplicado a audio, el mel-spectrograma es una de las representaciones más utilizadas como entrada a CNNs, pues concentra la información discriminativa y mejora la robustez frente a ruido ambiental \cite{Campos2022,HumBugDB}.
+
+\insertarfigura{fig/mel_spectrogram.png}
+{Waveform, espectrograma y mel-spectrograma de un segmento de audio de 10 segundos (Google AudioSet). 
+	El mel-spectrograma, basado en la escala perceptual Mel, ofrece mayor resolución en bajas frecuencias que el espectrograma lineal.}
+{fig:mel_spectrogram}{0.9}

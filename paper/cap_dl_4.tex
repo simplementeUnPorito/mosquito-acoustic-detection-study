@@ -1,0 +1,50 @@
+\subsection{Deep Learning para dirección de arribo y beamforming}
+\label{sec:dl_doa}
+
+La estimación de dirección de arribo (DoA) es un problema central en radar, comunicaciones inalámbricas y procesamiento acústico.  
+Los algoritmos clásicos como MUSIC destacan por su alta resolución angular, pero presentan limitaciones conocidas: baja robustez con pocas muestras (\emph{snapshots}), sensibilidad al ruido y dificultad para localizar fuentes coherentes.  
+Estas restricciones reducen su eficacia en escenarios prácticos.
+
+Un enfoque reciente, denominado \textbf{DLMUSIC}, combina técnicas de \emph{Deep Learning} con el marco clásico de MUSIC \cite{BaiChen2023_DLMUSIC}.  
+La propuesta introduce dos innovaciones principales:
+\begin{itemize}
+	\item \textbf{Estimación de la covarianza:} en lugar de usar la matriz de covarianza empírica, se entrenan redes convolucionales (CNNs) para predecir una versión más estable y robusta, menos sensible al ruido y al número de snapshots.  
+	\item \textbf{Espectro objetivo suavizado:} en vez de aproximar el espectro MUSIC real (que puede presentar picos distorsionados y lóbulos espurios en baja SNR), se utiliza un \emph{espectro idealizado} compuesto por funciones Gaussianas centradas en las direcciones verdaderas de llegada.  
+	Esta representación suavizada actúa como objetivo de entrenamiento, guiando a la red hacia picos definidos y reduciendo falsos máximos.
+\end{itemize}
+
+Tras la estimación de la covarianza por las CNNs, el algoritmo procede con la descomposición en autovalores y la separación de subespacios propia de MUSIC, preservando así la interpretabilidad del método clásico.  
+De esta manera, DLMUSIC no reemplaza la teoría de subespacios, sino que corrige las etapas más frágiles mediante aprendizaje profundo.
+
+De acuerdo con los resultados reportados, este enfoque supera al MUSIC clásico en escenarios de \textbf{baja SNR}, con \textbf{pocos snapshots} y en presencia de \textbf{fuentes coherentes} \cite{BaiChen2023_DLMUSIC}.  
+Ello demuestra cómo el \emph{Deep Learning} puede complementar a los algoritmos tradicionales, reforzando su desempeño en condiciones adversas y acercándolos a un uso más confiable en aplicaciones modernas.
+
+
+
+\subsection{Relevancia y aplicaciones}
+
+La importancia de enfoques como \textbf{DLMUSIC} radica en que resuelven varias de las limitaciones prácticas 
+de MUSIC clásico.  
+En escenarios reales, las señales rara vez cumplen las condiciones ideales: 
+se dispone de pocas muestras, el ruido no es despreciable y las fuentes pueden estar correlacionadas.  
+En esos casos, MUSIC pierde resolución o incluso falla en detectar las direcciones correctas.  
+
+El aporte de DLMUSIC es reemplazar las etapas más frágiles —estimación de covarianza y espectro de referencia— 
+por versiones aprendidas y suavizadas mediante \emph{deep learning}.  
+Esto no elimina la interpretabilidad del método subespacial, pero lo hace más \textbf{robusto frente a ruido, 
+	coherencia y baja cantidad de datos}.  
+En la práctica, significa pasar de un algoritmo que funciona bien solo en condiciones de laboratorio 
+a una herramienta con proyección en campo abierto.
+
+Más allá de los mosquitos, esta combinación de aprendizaje profundo con teoría de subespacios 
+puede aplicarse en dominios menos tradicionales, por ejemplo:
+\begin{itemize}
+	\item \textbf{Ubicación de fugas de gas} en plantas industriales usando arreglos de micrófonos para detectar ultrasonidos.  
+	\item \textbf{Localización de jugadores} en estadios mediante arreglos acústicos para análisis deportivo en tiempo real.  
+	\item \textbf{Identificación de puntos calientes en líneas de transmisión eléctrica} combinando antenas de RF y sensores térmicos.  
+	\item \textbf{Seguimiento de fauna submarina} (peces o crustáceos) mediante redes de hidrófonos de bajo costo.  
+\end{itemize}
+
+Así, DLMUSIC no sólo refuerza la robustez de MUSIC en condiciones adversas, 
+sino que abre la puerta a su uso en aplicaciones emergentes donde antes la estimación de dirección 
+no era viable por falta de SNR o de datos.

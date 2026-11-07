@@ -1,0 +1,152 @@
+\newpage
+\section{Phase-Locked Loops (PLL)}\label{sec:pll}
+
+Los \textbf{phase-locked loops (PLL)} son circuitos de lazo cerrado que ajustan 
+la fase (y por ende la frecuencia) de un oscilador controlado (\emph{VCO}/\emph{NCO}) 
+para que siga a la de una señal de referencia.  
+En esencia, el PLL compara la señal de entrada con una réplica generada internamente; 
+si detecta un desfase, corrige al oscilador hasta que ambas coincidan.
+
+Históricamente, los PLL se consolidaron en telecomunicaciones como bloques esenciales para la
+\emph{recuperación de portadoras}, \emph{demodulación de FM/PM}, 
+\emph{sincronización de fase/frecuencia} y \emph{recuperación de símbolos} 
+\cite{Haykin2001,Proakis2007,Gallager2008}.  
+Más allá de este uso tradicional, también se aplican al seguimiento de señales periódicas en acústica y en otros dominios donde interese estimar frecuencias dominantes 
+\cite{Han2015}.
+
+\insertarfigura{fig/PLLBlockDiagram.png}{Diagrama en bloques de un PLL clásico de segundo orden. 
+	Se distinguen el detector de fase (PD), el filtro de lazo $Z(s)$ y el oscilador controlado $K_v/s$, 
+	con realimentación opcional a través de un divisor $1/N$ \cite{Collins2018}.}{fig:pll:block}{1}
+\insertarfigurawide{fig/PLLBank.png}{Ejemplo de un sistema con múltiples PLLs distribuidos 
+	en un arreglo de antenas de RF, donde cada canal genera su propio oscilador local (LO). 
+	Aunque aquí se emplea en telecomunicaciones, ilustra el concepto general de bancos de PLLs 
+	trabajando en paralelo, principio que puede aplicarse también a la detección de tonos 
+	en sistemas acústicos \cite{PLLBankFig}.}{fig:pll:bank}{1}
+\subsection{Estructura básica e intuición}
+
+Como muestra la Fig.~\ref{fig:pll:block}, un PLL consta de:
+\begin{itemize}
+	\item \textbf{Detector de fase (PD)}: mide el desfase entre la señal externa y la interna.  
+	\item \textbf{Filtro de lazo $Z(s)$}: convierte la señal de error en una señal de control suave.  
+	\item \textbf{Oscilador controlado (VCO/NCO)}: ajusta su frecuencia de salida según el error.  
+	\item \textbf{Divisor $1/N$}: opcional en aplicaciones de síntesis de frecuencia.
+\end{itemize}
+
+El comportamiento puede explicarse así:  
+si la señal de entrada tiene una frecuencia ligeramente superior a la del oscilador, 
+el detector de fase produce un error positivo que acelera al VCO.  
+Si es más lenta, el error lo frena.  
+El proceso se repite hasta que el VCO acompaña de forma estable a la señal externa.  
+De este modo, el PLL actúa como un seguidor dinámico de fase y frecuencia.
+\balance
+\subsection{Modelo lineal}
+
+Cuando el lazo ya está cerca del enganche, el análisis puede simplificarse a un modelo lineal.  
+El error de fase $\phi_e = \phi_{\text{ref}} - \phi_{\text{vco}}$ obedece:
+\begin{equation}
+	\Phi_e(s) \;=\; \frac{1}{1 + K_d K_v \, \tfrac{Z(s)}{s}}\, \Phi_{\text{ref}}(s),
+\end{equation}
+donde $K_d$ es la ganancia del detector de fase, $K_v$ la sensibilidad del VCO y $Z(s)$ el filtro.  
+
+Si el filtro es proporcional-integral (PI):
+\begin{equation}
+	Z(s) = K_p + \frac{K_i}{s},
+\end{equation}
+el lazo cerrado se comporta como un sistema de segundo orden con:
+\[
+\omega_n = \sqrt{K_d K_v K_i}, \qquad 
+\zeta = \tfrac{1}{2}\sqrt{\tfrac{K_d K_v K_p}{K_i}},
+\]
+donde $\omega_n$ es la frecuencia natural del lazo y $\zeta$ el factor de amortiguamiento 
+\cite{Collins2018,ADI_MT086}.  
+Estos parámetros controlan la rapidez con la que el PLL se engancha, su estabilidad y si aparecen sobreoscilaciones.
+
+\subsection{Rangos prácticos y ruido}
+
+Tres magnitudes prácticas caracterizan el desempeño de un PLL \cite{Collins2018}:
+\begin{itemize}
+	\item \textbf{Lock range}: rango de frecuencias donde el lazo puede mantenerse enganchado.  
+	\item \textbf{Pull-in range}: rango desde el cual el lazo es capaz de lograr enganche inicial.  
+	\item \textbf{Ancho de banda $B_L$}: cuánto se deja pasar de variaciones rápidas y de ruido.
+\end{itemize}
+Un ancho de banda grande hace al lazo rápido, pero lo expone más al ruido; 
+uno estrecho lo protege, pero lo hace lento.
+
+\subsection{Implementación digital (DPLL)}
+
+En sistemas digitales, el VCO se reemplaza por un \emph{NCO} (Numerically Controlled Oscillator) 
+y todos los bloques se discretizan.  
+El detector de fase puede implementarse, por ejemplo, mezclando la señal de entrada con una referencia en cuadratura ($I$ y $Q$) y calculando:
+\[
+e_\phi[n] = \operatorname{atan2}(Q[n], I[n]).
+\]
+
+El filtro PI en forma discreta acumula el error de fase:
+\begin{align}
+	u[n] &= u[n-1] + K_p \, e_\phi[n] + K_i \sum_{k=0}^{n} e_\phi[k], \\
+	\phi_{\text{nco}}[n+1] &= \phi_{\text{nco}}[n] + K_v \, u[n].
+\end{align}
+
+Aquí:
+\begin{itemize}
+	\item $K_p$ define la respuesta rápida a cambios instantáneos,  
+	\item $K_i$ corrige errores de fase acumulados a largo plazo,  
+	\item $K_v$ traduce la señal de control en cambio de frecuencia del NCO.
+\end{itemize}
+
+En la práctica, este cálculo se implementa con sumadores, multiplicadores y acumuladores digitales, 
+por lo que es especialmente amigable a hardware como FPGAs.  
+Técnicas como Tustin o bilineal se usan para discretizar $K_p, K_i$ a partir del diseño analógico.
+
+\subsection{Banco de PLLs}
+Un ejemplo de este enfoque se observa en la Fig.~\ref{fig:pll:bank}. 
+En lugar de un único lazo, puede emplearse un banco de PLLs en paralelo, cada uno sintonizado a una frecuencia $f_k$.  
+Cada PLL entrega tres señales clave:
+\begin{itemize}
+	\item Un indicador de enganche (lock).  
+	\item La estimación de fase/frecuencia en su canal.  
+	\item La potencia coherente asociada a esa frecuencia.
+\end{itemize}
+Si un conjunto de PLLs (ej. los que cubren $f_0, 2f_0, 3f_0$) se enganchan al mismo tiempo, 
+se infiere la presencia de una señal con ese patrón armónico.  
+Esto equivale a un análisis espectral adaptativo con muy baja latencia y es factible en hardware embebido 
+\cite{Han2015}.
+
+\subsection{Ventajas y limitaciones}
+
+\textbf{Ventajas}: bajo costo computacional, buena selectividad, fácil de implementar en FPGA/DSP.  
+\textbf{Limitaciones}: rango de captura limitado, no separa dos fuentes con la misma frecuencia, 
+y puede perder enganche en ambientes con multitrayectoria severa \cite{Collins2018}.
+
+\subsection{Relevancia y aplicaciones}
+
+El uso de \textbf{PLLs} en este trabajo no responde únicamente a una cuestión técnica, 
+sino a la necesidad de \textbf{detectar y seguir componentes periódicas} dentro de señales ruidosas.  
+En el análisis de audio, esto es relevante porque muchas fuentes de interés —incluyendo insectos, 
+motores eléctricos o vocalizaciones humanas— se caracterizan por su periodicidad.  
+El PLL permite extraer esa frecuencia dominante en tiempo real con bajo costo computacional, 
+incluso cuando el entorno introduce variaciones o interferencias.
+
+El problema que resuelven es claro: \textit{¿cómo identificar y mantener la referencia de una señal 
+	cuando ésta se encuentra sumergida en ruido o compite con otras fuentes?}.  
+A diferencia de un filtrado espectral general, que entrega un panorama global pero con mayor latencia, 
+un PLL está optimizado para \textbf{seguir dinámicamente una frecuencia puntual} y entregar medidas 
+instantáneas de fase y potencia coherente.  
+Por ello resulta más adecuado en contextos donde interesa la estabilidad y rapidez de respuesta 
+(monitorización en drones, sistemas de control embebido, comunicaciones en tiempo real).
+
+En cuanto a aplicaciones más allá de los mosquitos, el mismo principio se utiliza en la 
+\textbf{sincronización de inversores de potencia con la red}, en la \textbf{recuperación de portadoras} 
+en receptores de radio o satélite, en \textbf{GPS para alinear relojes locales}, 
+e incluso en \textbf{biomedicina} para seguir ritmos cardiacos o respiratorios.  
+En contextos acústicos, podría servir para identificar patrones de maquinaria en mantenimiento predictivo 
+o para seguir frecuencias de habla en sistemas de mejora auditiva.
+
+Así, el análisis con PLL se justifica no sólo como técnica histórica de telecomunicaciones, 
+sino como un bloque versátil que puede compararse con métodos modernos:  
+ofrece interpretabilidad y eficiencia donde se requiere simplicidad, 
+mientras que enfoques más complejos (ej. \emph{deep learning}) se destinan a escenarios con mayor variabilidad.  
+Ambos enfoques no se excluyen, sino que pueden combinarse para formar sistemas híbridos.
+
+
+

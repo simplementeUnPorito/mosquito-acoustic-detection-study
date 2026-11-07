@@ -1,0 +1,18 @@
+\section{Conclusiones}\label{sec:conclusiones}
+
+Este trabajo recorrió un arco que va desde técnicas clásicas como los 
+\emph{Phase-Locked Loops} (PLL) y \emph{Matched Filters}, pasando por métodos de estimación de dirección de arribo (DAS, Capon, MUSIC, ESPRIT), hasta la incorporación de \emph{Deep Learning} y su factibilidad en \emph{hardware} embebido.  
+
+La comparación mostró el aporte de cada enfoque:  
+\begin{itemize}
+	\item Los métodos clásicos ofrecen interpretabilidad, estabilidad matemática y bajo costo computacional.  
+	\item Los métodos modernos basados en \emph{Deep Learning} aportan robustez ante ruido y variabilidad de entorno.  
+	\item La estimación de DOA agrega valor espacial frente a la mera detección espectral.  
+\end{itemize}
+
+Un resultado clave es que la \textbf{combinación} de enfoques clásicos y modernos abre un \textbf{paradigma híbrido} prometedor.  
+Ejemplos de ello son el uso de modelos de \emph{Deep Learning} para estabilizar etapas sensibles (como la estimación de covarianza) manteniendo la inferencia angular mediante teoría de subespacios (MUSIC/ESPRIT), o bien la aplicación de preprocesamiento clásico (filtros, \emph{matched filtering}, \emph{mel}-espectrogramas) como insumo para clasificadores modernos.  
+Esta sinergia mejora resolución y robustez, al tiempo que conserva trazabilidad en el flujo de señal.
+
+Finalmente, las \textbf{FPGA} emergen como habilitador práctico para llevar estos esquemas híbridos a tiempo real en sistemas portátiles de bajo consumo.  
+Persisten desafíos —tiempos de desarrollo, limitación de recursos lógicos y ecosistema aún parcial de herramientas—, pero la ruta DL + DOA + FPGA perfila una plataforma sólida para implementaciones embebidas y futuras líneas de investigación.

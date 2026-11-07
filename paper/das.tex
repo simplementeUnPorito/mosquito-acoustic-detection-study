@@ -1,0 +1,68 @@
+\subsection{Delay-and-Sum Beamformer (DAS)}\label{sec:doa:das}
+
+El método más clásico y sencillo para estimar la dirección de arribo es el 
+\textbf{beamformer de retraso y suma} (DAS, por sus siglas en inglés).  
+La idea es intuitiva: si se supone un ángulo de llegada, se compensan los retardos 
+con los que la onda alcanza a cada sensor, y luego se suman las señales.  
+
+\begin{itemize}
+	\item Cuando el ángulo supuesto coincide con el real, las señales quedan alineadas en fase 
+	y se refuerzan al sumarse (suma constructiva).  
+	\item Si el ángulo no corresponde, las señales llegan desfasadas 
+	y se atenúan entre sí (suma destructiva).  
+\end{itemize}
+
+De esta forma, basta recorrer un conjunto de ángulos candidatos y calcular la potencia 
+de la salida del beamformer para obtener el \textbf{espectro espacial DAS}: 
+los máximos de este espectro indican las direcciones estimadas de llegada de la señal 
+\cite{YangBook}.
+
+\subsubsection*{Características principales}
+\begin{itemize}
+	\item Implementación extremadamente simple y de bajo costo computacional.  
+	\item No requiere información adicional sobre el entorno ni sobre las señales.  
+	\item Resolución angular limitada: los lóbulos principales son anchos, 
+	lo que dificulta separar fuentes cercanas.  
+	\item Rechazo a interferencias poco eficiente.  
+	\item Mejora con mayor número de sensores y mayor apertura del arreglo.  
+\end{itemize}
+
+\subsubsection*{Formulación matemática}
+
+Sea $\mathbf{u}(t) \in \mathbb{C}^M$ el vector de observaciones de un arreglo de $M$ sensores, 
+y $R_{uu}=\mathbb{E}\{\mathbf{u}(t)\mathbf{u}^H(t)\}$ su matriz de correlación.  
+El \emph{steering vector} para un ángulo candidato $\varphi$ es:
+
+\begin{equation}
+	\mathbf{a}(\varphi) =
+	\begin{bmatrix}
+		1 \\
+		e^{j 2 \pi d_{\text{norm}} \cos \varphi} \\
+		e^{j 2 \pi d_{\text{norm}} \cdot 2 \cos \varphi} \\
+		\vdots \\
+		e^{j 2 \pi d_{\text{norm}} (M-1)\cos \varphi}
+	\end{bmatrix},
+\end{equation}
+
+donde $d_{\text{norm}} = d/\lambda$ es el espaciamiento normalizado entre elementos.  
+
+La salida del beamformer apuntando hacia $\varphi$ es:
+\begin{equation}
+	y(t) = \mathbf{a}^H(\varphi)\, \mathbf{u}(t),
+\end{equation}
+
+y su potencia promedio:
+\begin{equation}
+	P_{DAS}(\varphi) = \mathbf{a}^H(\varphi)\, R_{uu}\, \mathbf{a}(\varphi).
+\end{equation}
+
+Al graficar $P_{DAS}(\varphi)$ en función del ángulo, los picos corresponden 
+a las direcciones estimadas de arribo.  
+En la Fig.~\ref{fig:doa:dasMatlab} se muestra un ejemplo de este espectro 
+simulado en MATLAB para un arreglo lineal.
+
+\insertarfigura{fig/DAS.png}{Espectro espacial obtenido con el beamformer Delay-and-Sum (DAS). 
+	Se simularon tres fuentes incidentes en $30^\circ$, $50^\circ$ y $70^\circ$, 
+	con una relación señal-ruido (SNR) de 5~dB, usando un arreglo de 10 sensores 
+	uniformemente espaciados con $d_{norm}=0,5$. 
+	Los picos del espectro corresponden a las direcciones estimadas de arribo.}{fig:doa:dasMatlab}{1}

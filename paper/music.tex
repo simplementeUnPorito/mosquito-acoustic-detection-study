@@ -1,0 +1,104 @@
+\subsection{MUSIC (Multiple Signal Classification)}\label{sec:doa:music}
+
+El algoritmo \textbf{MUSIC} es uno de los métodos más influyentes para la estimación de dirección de arribo.  
+Su principal fortaleza es la capacidad de alcanzar \textbf{alta resolución}, separando fuentes muy cercanas angularmente incluso con un número moderado de sensores \cite{Gupta2015}.  
+
+La idea se basa en descomponer la matriz de correlación $R_{uu}$ en dos subespacios ortogonales:
+\begin{itemize}
+	\item El \textbf{espacio de señal}, generado por los \emph{steering vectors} de las fuentes reales.
+	\item El \textbf{espacio de ruido}, ortogonal al espacio de señal.
+\end{itemize}
+
+Un steering vector correspondiente a una dirección real de llegada es ortogonal al subespacio de ruido.  
+Por lo tanto, al proyectar $\mathbf{a}(\varphi)$ sobre ese subespacio, la proyección se anula en los ángulos correctos.
+
+\subsubsection*{Características}
+\begin{itemize}
+	\item Alta resolución, capaz de distinguir fuentes muy próximas.  
+	\item Requiere conocer o estimar el número de fuentes presentes.  
+	\item Sensible a correlaciones entre señales y a errores de calibración del arreglo.  
+\end{itemize}
+
+\subsubsection*{Formulación matemática}
+
+La descomposición en valores propios de $R_{uu}$ permite separar:
+\begin{equation}
+	R_{uu} = E_s \Lambda_s E_s^H + E_n \Lambda_n E_n^H,
+\end{equation}
+donde $E_s$ contiene los autovectores asociados a las fuentes (espacio de señal) y $E_n$ los del ruido.
+
+El espectro espacial de MUSIC se define como:
+\begin{equation}
+	P_{\text{MUSIC}}(\varphi) = 
+	\frac{1}{\mathbf{a}^H(\varphi)\, E_n E_n^H\, \mathbf{a}(\varphi)}.
+\end{equation}
+
+Los picos de $P_{\text{MUSIC}}(\varphi)$ corresponden a las direcciones estimadas de llegada.  
+
+\insertarfigura{fig/MUSIC.png}{Espectro espacial obtenido con el algoritmo MUSIC. 
+	Se simularon tres fuentes incidentes en $30^\circ$, $50^\circ$ y $70^\circ$, 
+	con SNR de 5~dB y un arreglo ULA de 10 sensores con $d_{norm}=0,5$. 
+	Los picos estrechos permiten distinguir claramente las fuentes.}{fig:doa:musicMatlab}{1}
+
+\subsection{Root-MUSIC}\label{sec:doa:rootmusic}
+
+El método \textbf{Root-MUSIC} es una variante diseñada para evitar el barrido angular.  
+En lugar de evaluar $P_{\text{MUSIC}}(\varphi)$ punto a punto, 
+transforma el problema en encontrar raíces de un polinomio complejo asociado al subespacio de ruido.  
+
+\subsubsection*{Ventajas}
+\begin{itemize}
+	\item Reduce la complejidad computacional (no requiere barrido angular).  
+	\item Ofrece estimaciones más precisas en comparación con MUSIC clásico.   
+\end{itemize}
+
+\subsubsection*{Limitación principal}
+\begin{itemize}
+	\item Está restringido a arreglos lineales uniformes (ULA). 
+\end{itemize}
+
+\subsubsection*{Formulación matemática}
+
+Se define el polinomio:
+\begin{equation}
+	Q[z] = \sum_{k=-(M-1)}^{M-1} q_k z^{-k}, 
+	\qquad q_k = \sum_{m-l=k} C(m,l),
+\end{equation}
+con $z = e^{j 2\pi \tfrac{d}{\lambda} \cos\varphi}$ y $C = E_n E_n^H$.  
+
+Las raíces $z_i$ cercanas al círculo unitario determinan los ángulos estimados:
+\begin{equation}
+	\hat{\varphi}_i = \cos^{-1}\!\left(\frac{\angle z_i}{2\pi d}\right).
+\end{equation}
+
+\subsection{Spatial Smoothing MUSIC}\label{sec:doa:ssmusic}
+
+El \textbf{spatial smoothing} es una extensión de MUSIC para manejar señales \emph{coherentes} (por ejemplo, en presencia de multitrayectoria).  
+Cuando las señales son coherentes, la matriz $R_{uu}$ pierde rango y MUSIC clásico falla.  
+El smoothing restaura el rango promediando matrices de correlación de subarreglos \cite{Gupta2015}.  
+
+\subsubsection*{Características}
+\begin{itemize}
+	\item Permite detectar señales coherentes que MUSIC clásico no puede resolver.  
+	\item A costa de reducir la apertura efectiva del arreglo (menor resolución).  
+	\item \emph{Forward smoothing}: detecta hasta $M/2$ señales coherentes.  
+	\item \emph{Forward/Backward smoothing}: hasta $2M/3$ señales coherentes.  
+\end{itemize}
+
+\subsubsection*{Formulación matemática}
+
+Sea $K=M-p+1$ el número de subarreglos forward posibles.  
+La correlación promedio es:
+\begin{equation}
+	R^f = \frac{1}{K}\sum_{k=0}^{K-1} R^f_k.
+\end{equation}
+
+Si además se consideran subarreglos backward, se obtiene:
+\begin{equation}
+	R = \frac{R^f + R^b}{2}.
+\end{equation}
+
+\insertarfigura{fig/MUSIC-SS.png}{Ejemplo de MUSIC con spatial smoothing (SS-MUSIC). 
+	Se consideran tres fuentes coherentes en $30^\circ$, $50^\circ$ y $70^\circ$, 
+	con SNR de 5~dB y 10 sensores ($d_{norm}=0,5$). 
+	El smoothing restaura el rango de la matriz de correlación y permite separar correctamente las fuentes.}{fig:doa:ssmusicMatlab}{1}

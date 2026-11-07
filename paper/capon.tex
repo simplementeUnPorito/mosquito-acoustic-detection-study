@@ -1,0 +1,59 @@
+\subsection{Capon Beamformer (MVDR)}\label{sec:doa:capon}
+
+El beamformer de \textbf{Capon}, también conocido como 
+\textbf{MVDR (Minimum Variance Distortionless Response)}, 
+se propuso como una mejora directa del método Delay-and-Sum.  
+Su idea central es apuntar hacia una dirección deseada sin distorsionar la señal proveniente de allí, 
+al mismo tiempo que se minimiza la energía recibida desde todas las demás direcciones.  
+
+De manera intuitiva, si el DAS se asemeja a una linterna con un haz ancho, 
+Capon actúa como un láser mucho más fino: concentra la ganancia únicamente en el ángulo de interés 
+y suprime la contribución de señales interferentes \cite{YangBook}.
+
+\begin{itemize}
+	\item \textbf{Ganancia unitaria en la dirección deseada}: se garantiza que la señal en el ángulo $\varphi$ no se distorsione.  
+	\item \textbf{Mínima potencia desde otras direcciones}: los pesos del arreglo se ajustan para cancelar la energía procedente del resto del espacio.  
+\end{itemize}
+
+\subsubsection*{Características}
+\begin{itemize}
+	\item Mayor resolución que DAS: lóbulos principales más estrechos y mejor discriminación angular.  
+	\item Rechazo eficaz de interferencias fuera de la dirección de interés.  
+	\item Requiere una estimación precisa de la matriz de correlación $R_{uu}$; con pocos datos puede degradarse.  
+	\item Más costoso computacionalmente, ya que exige invertir matrices.  
+	\item Sensible a errores de calibración en el arreglo.  
+\end{itemize}
+
+\subsubsection*{Formulación matemática}
+
+El problema de diseño de Capon se plantea como una optimización:
+\begin{equation}
+	\min_{\mathbf{w}} \; \mathbf{w}^H R_{uu}\, \mathbf{w}
+	\quad \text{sujeto a} \quad \mathbf{w}^H \mathbf{a}(\varphi) = 1,
+\end{equation}
+donde $R_{uu}$ es la matriz de correlación de las señales, 
+$\mathbf{a}(\varphi)$ es el \emph{steering vector}, 
+y $\mathbf{w}$ los pesos del beamformer.
+
+La solución, obtenida con multiplicadores de Lagrange, es:
+\begin{equation}
+	\mathbf{w}_c(\varphi) = \frac{R_{uu}^{-1}\, \mathbf{a}(\varphi)}
+	{\mathbf{a}^H(\varphi)\, R_{uu}^{-1}\, \mathbf{a}(\varphi)}.
+\end{equation}
+
+El espectro espacial asociado al beamformer de Capon es:
+\begin{equation}
+	P_{\text{Capon}}(\varphi) = 
+	\frac{1}{\mathbf{a}^H(\varphi)\, R_{uu}^{-1}\, \mathbf{a}(\varphi)}.
+\end{equation}
+
+Los máximos de $P_{\text{Capon}}(\varphi)$ señalan las direcciones estimadas de arribo, 
+con lóbulos mucho más estrechos que los de DAS, 
+tal como se aprecia en la Fig.~\ref{fig:doa:caponMatlab}.
+
+\insertarfigura{fig/CAPON.png}{Espectro espacial obtenido con el beamformer de Capon (MVDR). 
+	Se simularon tres fuentes incidentes en $30^\circ$, $50^\circ$ y $70^\circ$, 
+	con una relación señal-ruido (SNR) de 5~dB, usando un arreglo de 10 sensores 
+	con espaciamiento normalizado $d_{norm}=0,5$. 
+	En comparación con DAS, los lóbulos principales son más estrechos, 
+	lo que permite una mejor discriminación angular entre fuentes cercanas.}{fig:doa:caponMatlab}{1}

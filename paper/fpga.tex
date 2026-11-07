@@ -1,0 +1,42 @@
+\section{Implementación en hardware embebido (FPGA)}\label{sec:fpga}
+
+El despliegue de algoritmos de \emph{Deep Learning} en sistemas embebidos requiere procesar datos en tiempo real bajo restricciones de consumo energético y tamaño.  
+Estas condiciones no siempre pueden cumplirse con plataformas de propósito general como CPU o GPU.  
+En este contexto, las \textbf{FPGA} (Field Programmable Gate Arrays) constituyen una alternativa atractiva, al permitir arquitecturas paralelas y personalizadas con menor consumo y latencias más predecibles, lo que las hace idóneas para aplicaciones portátiles e integradas \cite{FPGA2019}.
+
+De acuerdo con la revisión de Shawahna et al., las FPGA se emplean principalmente como \textbf{aceleradores de inferencia}, explotando:  
+\begin{itemize}
+	\item \textbf{Optimización de precisión}: uso de aritmética en punto fijo o de baja resolución.  
+	\item \textbf{Paralelismo jerárquico}: a nivel de datos, filtros y capas.  
+	\item \textbf{Compresión y reutilización de pesos}: reduce accesos a memoria externa, principal cuello de botella.  
+	\item \textbf{Pipeline de capas}: la salida de cada etapa alimenta de inmediato a la siguiente, evitando almacenamientos intermedios costosos.  
+\end{itemize}
+
+No obstante, la implementación de redes neuronales en FPGA presenta \textbf{desafíos relevantes}: mayores tiempos de desarrollo frente a CPU/GPU, limitación de recursos lógicos (celdas, DSPs, BRAM) y compatibilidad aún parcial con frameworks de \emph{Deep Learning}.  
+Aun así, la literatura destaca que las FPGA se perfilan como una de las soluciones más prometedoras para llevar inteligencia artificial a sistemas embebidos de tamaño reducido \cite{FPGA2019}.
+
+
+\subsection{Relevancia y aplicaciones}
+
+El interés en las \textbf{FPGA} no reside solo en su eficiencia computacional, 
+sino en que permiten trasladar algoritmos complejos de aprendizaje profundo a entornos donde 
+las CPU o GPU no son viables por consumo, tamaño o latencia.  
+Esto es clave para pasar de prototipos en laboratorio a sistemas integrados que funcionen de manera autónoma.
+
+El problema que abordan es: \textit{¿cómo ejecutar modelos de Deep Learning en tiempo real dentro de plataformas 
+	portátiles o embebidas, sin depender de infraestructura de alto consumo?}.  
+Las FPGA resuelven esta brecha ofreciendo paralelismo masivo, control fino de recursos y la posibilidad 
+de personalizar cada etapa del procesamiento.
+
+Más allá de la detección de mosquitos, estas capacidades tienen aplicaciones diversas:
+\begin{itemize}
+	\item \textbf{Implantes médicos inteligentes}: procesar señales neuronales o cardíacas directamente en el dispositivo, con baja latencia y sin depender de un enlace inalámbrico constante.  
+	\item \textbf{Vehículos aéreos pequeños}: integración de visión por computadora en drones de bajo peso para navegación autónoma en entornos donde no puede cargarse una GPU.  
+	\item \textbf{Sistemas espaciales}: reconocimiento de patrones en imágenes satelitales a bordo, reduciendo la necesidad de transmitir grandes volúmenes de datos a tierra.  
+	\item \textbf{Agricultura de precisión}: detección de plagas o enfermedades en cultivos mediante sensores acústicos y ópticos, con procesamiento en campo y en tiempo real.  
+\end{itemize}
+
+De esta forma, las FPGA no sólo representan una plataforma eficiente de aceleración, 
+sino que habilitan el despliegue de inteligencia artificial en escenarios donde las limitaciones 
+de energía, tamaño o latencia hacen inviable cualquier otra solución.
+

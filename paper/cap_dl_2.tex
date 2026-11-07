@@ -1,0 +1,80 @@
+\subsection{CNNs aplicadas a HumBugDB}
+\label{sec:dl_cnn}
+
+El conjunto de datos \emph{HumBugDB} constituye un recurso extenso y representativo de grabaciones acústicas de mosquitos en entornos de laboratorio y de campo \cite{HumBugDB}.  
+La señal característica del mosquito es un zumbido cuasi-periódico producido por el batido de alas, con frecuencia fundamental y armónicos.  
+Su detección en grabaciones reales es desafiante, ya que suele estar enmascarada por ruidos ambientales como viento, tráfico o voces humanas.
+
+\subsubsection*{Inferencia bayesiana mediante MC Dropout}
+
+En redes profundas, las predicciones suelen ser tratadas como determinísticas, sin cuantificar la confianza.  
+Gal y Ghahramani (2016) demostraron que el \emph{dropout} —originalmente introducido como técnica de regularización— puede interpretarse como una aproximación bayesiana cuando se mantiene activo también durante la inferencia.  
+
+Este procedimiento, conocido como \emph{Monte Carlo Dropout} (MC Dropout), consiste en realizar múltiples pasadas de inferencia con distintas máscaras de dropout, generando una distribución de salidas en lugar de un valor único.  
+A partir de esa distribución se obtienen medidas de incertidumbre, como la varianza predictiva, lo que permite distinguir entre predicciones seguras y dudosas \cite{GalGhahramani2016}.  
+En audio bioacústico esta capacidad resulta esencial, pues las señales suelen estar contaminadas por ruido.
+
+\subsubsection{Motivación del uso de CNNs}
+
+Las Redes Neuronales Convolucionales (CNNs) son especialmente adecuadas porque trabajan sobre representaciones bidimensionales como los mel-spectrogramas.  
+Una capa convolucional aplica filtros $w^{(k)}$ sobre la entrada $x$ de acuerdo con\(
+y_{i,j}^{(k)} = \sigma \!\left( \sum_{m=0}^{M-1}\sum_{n=0}^{N-1} 
+w_{m,n}^{(k)} \, x_{i+m,\,j+n} + b^{(k)} \right),
+\) donde $b^{(k)}$ es el sesgo y $\sigma(\cdot)$ la activación.  
+
+Este mecanismo permite aprender filtros jerárquicos: los primeros sensibles a patrones locales (armónicos, periodicidades) y los posteriores a representaciones más abstractas que diferencian especies o condiciones de grabación.
+
+\subsubsection{Aplicación y robustez en HumBugDB}
+
+En HumBugDB, las CNNs se entrenan sobre ventanas de audio convertidas en mel-spectrogramas, que concentran la estructura espectral relevante en un dominio perceptual comprimido.  
+Campos et al. (2022) mostraron que, incorporando \emph{data augmentation} acústico —mezcla con ruido de fondo, variaciones de tono y estiramiento temporal—, los modelos aprenden representaciones invariantes a perturbaciones comunes, mejorando su desempeño en ambientes ruidosos \cite{Campos2022}.  
+
+Los \emph{kernels} se optimizan mediante retropropagación y no se fijan como filtros predefinidos, lo que permite a la red adaptarse a patrones específicos de mosquitos.  
+La normalización por lotes y el \emph{dropout} introducen estocasticidad que previene el sobreajuste.  
+Además, al mantener dropout activo en inferencia, se generan múltiples predicciones por entrada, lo que habilita la estimación de incertidumbre asociada a cada salida \cite{GalGhahramani2016}.  
+
+\subsubsection{Resultados}
+
+Los estudios iniciales reportaron que las CNNs superan ampliamente a clasificadores tradicionales (SVMs, Random Forests) cuando se entrenan con mel-spectrogramas de HumBugDB.  
+Además de detectar la presencia de mosquitos, los modelos pueden diferenciar especies, lo cual aporta valor epidemiológico para programas de control de vectores \cite{HumBugDB, Campos2022}.  
+La combinación de \emph{data augmentation}, kernels entrenables y regularización bayesiana mediante dropout convierte a estas arquitecturas en una herramienta robusta para la detección acústica en condiciones reales.
+\insertarfigura{fig/cnn_humbugdb.png}
+{Arquitectura típica de una CNN utilizada en HumBugDB. 
+	El pipeline incluye: entrada de mel-spectrogramas, convoluciones con activación ReLU y max-pooling, 
+	aplanamiento de características y capas densas para la clasificación. 
+	Manteniendo dropout activo también en la fase de inferencia es posible estimar la incertidumbre asociada a cada predicción.}
+{fig:cnn_humbugdb}{0.1}
+
+
+\subsection{Relevancia y aplicaciones}
+
+El uso de \textbf{CNNs} en HumBugDB responde a una necesidad concreta: 
+\textbf{detectar y clasificar señales acústicas en entornos altamente ruidosos}.  
+En este caso se trata de zumbidos de mosquitos, pero el problema es más general: 
+identificar patrones espectro-temporales que se mantienen estables aun cuando el ambiente introduce 
+variaciones de fondo, superposición de fuentes o degradaciones de calidad.
+
+La relevancia del análisis es clara: si bien métodos clásicos como filtros adaptados o PLLs 
+pueden detectar frecuencias dominantes, no ofrecen la flexibilidad de discriminar entre especies 
+o de adaptarse a entornos cambiantes.  
+Las CNNs, en cambio, aprenden \textbf{representaciones jerárquicas} que capturan tanto 
+patrones locales (armónicos, periodicidad) como características más abstractas que permiten generalizar.  
+
+El problema que se intenta resolver es: \textit{¿cómo construir un detector robusto y práctico 
+	que funcione no sólo en condiciones de laboratorio, sino también en ambientes reales, 
+	con ruido, voces, tráfico o viento?}.  
+La respuesta está en combinar arquitecturas convolucionales con técnicas de regularización 
+y estimación de incertidumbre (MC Dropout), lo que brinda un detector más confiable.
+
+Más allá de los mosquitos, estas mismas técnicas pueden aplicarse a:  
+\begin{itemize}
+	\item \textbf{Detección de disparos y explosiones} en seguridad pública, para activar alertas tempranas en ciudades.  
+	\item \textbf{Reconocimiento de llamadas de ballenas y delfines} en estudios oceánicos, incluso bajo el ruido de barcos.  
+	\item \textbf{Identificación de defectos en soldaduras} a partir del sonido emitido durante el proceso industrial.  
+	\item \textbf{Monitoreo de cultivos agrícolas} detectando plagas a través de sonidos de insectos distintos a los mosquitos.  
+	\item \textbf{Diagnóstico de fallas en vehículos eléctricos}, distinguiendo ruidos anómalos de los motores o inversores.  
+\end{itemize}
+
+De esta forma, las CNNs no sólo representan un salto frente a técnicas clásicas en detección de mosquitos, 
+sino que muestran cómo el \textbf{aprendizaje profundo} puede extenderse a un amplio rango de problemas 
+donde las señales acústicas contienen información crítica que debe ser detectada en tiempo real.

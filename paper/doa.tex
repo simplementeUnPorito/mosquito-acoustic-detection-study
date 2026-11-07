@@ -1,0 +1,130 @@
+\section{Estimación de Dirección de Arribo (DOA)}\label{sec:doa} 
+
+La \textbf{estimación de dirección de arribo (Direction of Arrival, DOA)} busca determinar 
+desde qué ángulo llega una onda a un arreglo de sensores.  
+Un ejemplo ilustrativo es la ecolocación de los murciélagos: 
+pequeñas diferencias de tiempo y fase entre ambos oídos permiten estimar 
+la dirección del sonido (véase Fig.~\ref{fig:doa:biologico}).  
+En un arreglo de micrófonos ocurre lo mismo: 
+cada sensor recibe la misma onda con un retardo relativo, 
+y ese desfase contiene la información angular (Fig.~\ref{fig:doa:arregloSensores}) \cite{YangBook}.
+
+\insertarfigura{fig/doaArregloSensores.png}{Arreglo de sensores lineal para estimación de DOA.}{fig:doa:arregloSensores}{1}
+\insertarfigura{fig/DoaBiologico.png}{Ejemplo biológico de estimación de dirección de arribo en murciélagos.}{fig:doa:biologico}{1}
+
+\subsection{Modelo de onda plana unidimensional}
+
+Consideremos primero una onda plana armónica propagándose a lo largo de un eje \(x\). 
+La señal recibida en la posición \(x\) es:
+\begin{equation}
+	s(x,t) = A \, e^{j(\beta x - \omega t + \phi_0)},
+\end{equation}
+donde \(A\) es la amplitud, \(\beta=2\pi/\lambda\) el número de onda, 
+\(\omega=2\pi f\) la frecuencia angular y \(\phi_0\) la fase inicial.  
+
+Esta expresión refleja dos aspectos:  
+(i) el término temporal \(e^{-j\omega t}\) describe la oscilación sinusoidal,  
+(ii) el término espacial \(e^{j\beta x}\) indica cómo cambia la fase al desplazarse en \(x\).  
+Cuando la onda avanza una longitud de onda \(\lambda\), 
+el exponente completa un ciclo de \(2\pi\), ilustrando su periodicidad (Fig.~\ref{fig:doa:ondaPlana}).  
+
+\insertarfigura{fig/doaOndaPlana.png}{Onda plana en un medio unidimensional.}{fig:doa:ondaPlana}{1}
+
+\subsection{Extensión al caso tridimensional}
+
+En tres dimensiones, la onda plana en \(\mathbf{x} = [x_1,x_2,x_3]^T\) se escribe:
+\begin{equation}
+	s(\mathbf{x},t) = s(\mathbf{0},t)\, 
+	e^{j \beta ( x_1 \cos\varphi \sin\theta + x_2 \sin\varphi \sin\theta + x_3 \cos\theta )},
+\end{equation}
+donde \(\varphi\) es el \textbf{azimut} y \(\theta\) la \textbf{elevación}.  
+Aquí \(s(\mathbf{0},t)\) es la señal de la fuente en su origen.  
+En DOA lo importante no es el contenido exacto de \(s(\mathbf{0},t)\), 
+sino cómo la propagación introduce diferencias de fase entre sensores \cite{YangBook}.
+
+\subsection{Arreglos linealmente uniformes}
+
+Un caso clásico es el \textbf{Uniform Linear Array (ULA)}: 
+una fila de $M$ sensores equiespaciados (Fig.~\ref{fig:doa:arregloSensores}).  
+Si la onda incide frontalmente, todos los micrófonos reciben la señal en fase.  
+En cambio, con un ángulo oblicuo aparecen retardos progresivos: 
+cuanto más inclinado, mayor la diferencia de tiempos entre sensores.  
+
+En términos físicos, cada micrófono mide la misma señal con una \textbf{fase distinta}.  
+Ese patrón de desfases codifica la dirección de llegada.  
+Matemáticamente, la señal en el micrófono $m$-ésimo es:
+\begin{equation}
+	s_m(t) = s(0,t)\, a_m(\varphi,\theta),
+\end{equation}
+donde $s(0,t)$ es la señal de referencia y $a_m(\varphi,\theta)$ un factor de fase:
+\begin{equation}
+	a_m(\varphi,\theta) = e^{j \beta m d \cos\varphi \sin\theta}.
+\end{equation}
+
+\subsection{Steering vector}
+
+Agrupando todos los factores de fase en un vector columna se obtiene el \textbf{steering vector}:
+\begin{equation}
+	\mathbf{a}(\varphi,\theta) =
+	\begin{bmatrix}
+		1 \\
+		e^{j \beta d \cos\varphi \sin\theta} \\
+		e^{j 2 \beta d \cos\varphi \sin\theta} \\
+		\vdots \\
+		e^{j (M-1)\beta d \cos\varphi \sin\theta}
+	\end{bmatrix}.
+\end{equation}
+
+Este vector es la \textbf{firma espacial} del arreglo: 
+si la onda proviene de \((\varphi,\theta)\), las fases se alinean, 
+y los algoritmos de DOA (DAS, Capon, MUSIC, ESPRIT) lo utilizan como base 
+para estimar la dirección de la fuente \cite{YangBook,Gupta2015}.  
+
+
+
+
+\input{das} \input{capon} \input{music}
+\insertarfigurawide{fig/comparativoDOA.png}{Comparación de métodos de estimación de DOA: 
+	DAS muestra lóbulos anchos y baja resolución; 
+	Capon mejora la nitidez pero aún con interferencias; 
+	MUSIC separa claramente las fuentes en condiciones adversas; 
+	y ESPRIT obtiene los ángulos sin necesidad de barrido.}{fig:doa:comparacion}{1}
+ \input{esprit}
+
+Finalmente, para contrastar los distintos métodos se simuló un escenario común 
+(Fig.~\ref{fig:doa:comparacion}) con tres fuentes en $30^\circ$, $50^\circ$ y $70^\circ$, 
+relación señal-ruido de 5~dB, un arreglo ULA de 10 sensores con espaciamiento normalizado $d_{norm}=0,5$, 
+y multitrayectoria (trayectoria directa más una retardada).  
+En el caso de MUSIC con \emph{spatial smoothing}, se emplearon $M-2$ subarreglos solapados.
+
+
+\subsection{Relevancia y aplicaciones}
+
+Los métodos de \textbf{estimación de dirección de arribo (DOA)} responden a una necesidad central: 
+\textbf{localizar espacialmente una fuente sonora o electromagnética a partir de un arreglo de sensores}.  
+En el análisis de audio, esto significa no solo detectar que un mosquito está presente, 
+sino también \textbf{saber desde qué dirección llega su zumbido}, lo que habilita aplicaciones de seguimiento 
+y control (por ejemplo, orientar un dron hacia el objetivo).
+
+El problema que se aborda es: \textit{¿cómo separar y ubicar múltiples señales simultáneas en un entorno ruidoso?}.  
+Los algoritmos clásicos como DAS o Capon proporcionan soluciones basadas en filtrado espacial, 
+fáciles de interpretar pero limitadas en resolución.  
+Técnicas como MUSIC y ESPRIT aprovechan la descomposición en subespacios de la matriz de covarianza 
+para alcanzar una \textbf{resolución angular muy superior}, incluso cuando las fuentes están cercanas.  
+Cada enfoque es más adecuado según el contexto: métodos clásicos ofrecen bajo costo computacional 
+y robustez, mientras que los subespaciales brindan mayor precisión a costa de mayor complejidad.
+
+Más allá de los mosquitos, los algoritmos de DOA se aplican en un amplio rango de problemas:  
+\begin{itemize}
+	\item \textbf{Comunicaciones inalámbricas}: beamforming en 5G/6G para dirigir haces adaptativos.  
+	\item \textbf{Acústica arquitectónica}: ubicar fuentes de ruido en edificios o ciudades inteligentes.  
+	\item \textbf{Sonar y radar}: localizar embarcaciones, submarinos o aeronaves en entornos adversos.  
+	\item \textbf{Biomedicina}: identificar focos de actividad en el cerebro a partir de EEG/MEG.  
+\end{itemize}
+
+En todos estos casos, la lógica es la misma: aprovechar la información espacial contenida en las diferencias 
+de fase y amplitud entre sensores para estimar ángulos de llegada.  
+Así, la estimación de DOA se convierte en un paso natural que extiende la simple detección de señales, 
+aportando un componente espacial que es indispensable para sistemas de localización y seguimiento modernos.
+
+

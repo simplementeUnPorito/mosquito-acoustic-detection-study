@@ -1,0 +1,43 @@
+\subsection{Modelos secuenciales}
+\label{sec:dl_seq_bayes}
+
+\subsubsection*{RNN y LSTM}
+
+Otra familia de arquitecturas fundamentales en audio son las \emph{Redes Neuronales Recurrentes} (RNNs), diseñadas para procesar secuencias temporales.  
+En una RNN, la salida en cada instante $t$ depende no solo de la entrada $x_t$, sino también del estado oculto $h_{t-1}$, lo que permite modelar dependencias a lo largo del tiempo.  
+
+El entrenamiento de RNNs estándar enfrenta el problema del \emph{gradiente desvanecido o explosivo}.  
+Durante la retropropagación a través del tiempo (BPTT), los gradientes se multiplican repetidamente por derivadas de funciones de activación.  
+Si estas son menores que uno, los gradientes tienden a cero (\emph{vanishing}); si son mayores que uno, crecen exponencialmente (\emph{exploding}).  
+Como consecuencia, la red tiene dificultades para aprender dependencias de largo plazo de manera estable.
+
+Para mitigar este problema se introdujeron variantes como las \emph{Long Short-Term Memory} (LSTM) y las \emph{Gated Recurrent Units} (GRU), que incorporan compuertas de control del flujo de información:
+\begin{itemize}
+	\item La \textbf{puerta de olvido} decide qué parte del estado anterior se descarta.  
+	\item La \textbf{puerta de entrada} regula qué información nueva se incorpora a la memoria.  
+	\item La \textbf{puerta de salida} determina qué fracción del estado interno influye en la salida actual.  
+\end{itemize}
+
+Gracias a este diseño, las LSTM mantienen gradientes estables en secuencias largas, permitiendo capturar dependencias temporales de distinto alcance \cite{DL_MusicReview}.  
+Estas arquitecturas han sido ampliamente utilizadas en tareas de \emph{Music Information Retrieval} (MIR), como clasificación de género musical, transcripción automática o separación de fuentes, y continúan siendo un estándar en el modelado de series temporales \cite{DL_MusicReview}.
+
+
+\subsection{Relevancia y diferencias frente a CNNs}
+
+Tanto las CNNs como las RNNs trabajan con información temporal, pero de manera distinta.  
+En un espectrograma, una CNN aprende patrones \textbf{locales} en bloques tiempo–frecuencia (armónicos, texturas, repeticiones), 
+y puede combinarlos jerárquicamente para formar representaciones más complejas.  
+Sin embargo, su ventana de contexto queda limitada por el tamaño de los filtros y la profundidad de la red.
+
+Las RNNs, en cambio, procesan la secuencia de cuadros de manera explícita: el estado oculto transporta información entre instantes, 
+lo que permite modelar dependencias \textbf{a más largo plazo} que las que cubre un kernel convolucional.  
+Por eso resultan útiles cuando interesa capturar variaciones lentas o estructuras que se extienden en el tiempo 
+(como la evolución del zumbido de un insecto o el fraseo en música).
+
+En síntesis:
+\begin{itemize}
+	\item \textbf{CNNs}: detectan patrones locales robustos en el plano tiempo–frecuencia.  
+	\item \textbf{RNNs/LSTM}: modelan cómo esos patrones se encadenan a lo largo de secuencias extensas.  
+\end{itemize}
+
+Hoy en día, ambos enfoques se consideran complementarios y a menudo se integran en arquitecturas híbridas.

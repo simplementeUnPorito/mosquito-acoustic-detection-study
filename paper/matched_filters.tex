@@ -1,0 +1,138 @@
+\section{Matched Filters}\label{sec:matched}
+
+El \textbf{filtro adaptado} o \emph{matched filter} es un sistema lineal que 
+maximiza la relación señal--ruido (SNR) en la detección de una señal conocida inmersa en ruido.  
+La idea central es simple: si se conoce la forma de la señal $s(t)$, 
+el filtro más efectivo es aquel cuya respuesta al impulso está adaptada a ella 
+\cite{Bancroft2002,Haykin2001,Proakis2007}.
+
+\subsection{Convolución y correlación}
+
+En procesamiento de señales, la \textbf{convolución} describe la salida $y(t)$ de un sistema lineal:
+\begin{equation}
+	y(t) = \int r(\tau)\, h(t-\tau)\, d\tau,
+\end{equation}
+donde $r(t)$ es la entrada y $h(t)$ la respuesta al impulso.  
+
+Por otro lado, la \textbf{correlación} mide la similitud entre una señal recibida $r(t)$ 
+y una señal de referencia $s(t)$:
+\begin{equation}
+	c(t) = \int r(\tau)\, s^*(\tau-t)\, d\tau.
+\end{equation}
+
+La conexión clave es que un filtro adaptado se diseña de modo que 
+su salida de convolución con $r(t)$ sea equivalente a la correlación entre $r(t)$ y $s(t)$
+\cite{Bancroft2002}.
+
+\subsection{Por qué invertir la señal}
+
+Para lograr esta equivalencia, el filtro se define con una respuesta al impulso:
+\begin{equation}
+	h(t) = s^*(T-t),
+\end{equation}
+donde $T$ es la duración de la señal.  
+La inversión temporal $s(T-t)$ asegura que:
+\begin{enumerate}
+	\item La salida presente un máximo bien definido justo cuando la señal $s(t)$ se alinea con $r(t)$.  
+	\item El filtrado se pueda implementar de manera causal mediante el corrimiento apropiado.  
+\end{enumerate}
+
+De esta manera, la salida del filtro alcanza un pico en el instante en que la señal buscada aparece en la observación.
+
+\subsection{Definición formal}
+
+Si la señal recibida es $r(t) = s(t) + n(t)$, con $n(t)$ ruido blanco gaussiano, 
+puede demostrarse que el filtro $h(t)=s^*(T-t)$ es el que 
+\textbf{maximiza la SNR de salida} \cite{Bancroft2002}.
+
+\subsection{Implementación digital}
+
+En tiempo discreto, el matched filter se implementa como un \textbf{filtro FIR} 
+(\emph{Finite Impulse Response}, respuesta al impulso finita).  
+La salida en el instante $k$ depende de una combinación lineal de un número finito de muestras pasadas:
+\begin{equation}
+	y[k] = \sum_{n=0}^{N-1} h[n]\, r[k-n],
+\end{equation}
+donde $h[n]$ son los coeficientes del filtro y $N$ su longitud.  
+
+En el caso del matched filter, los coeficientes son la versión 
+invertida y conjugada de la señal patrón:
+\begin{equation}
+	h[n] = s^*[N-1-n], \qquad n=0,\dots,N-1,
+\end{equation}
+con $s[n]$ la secuencia conocida que se desea detectar.
+
+\subsubsection*{Interpretación práctica}
+
+\begin{itemize}
+	\item Cada coeficiente $h[n]$ almacena la forma de la señal buscada.  
+	\item El cálculo $y[k]$ equivale a “superponer” $s[n]$ sobre la ventana de datos más reciente de $r[n]$.  
+	\item Si las dos secuencias coinciden (salvo por ruido), la suma ponderada es máxima y $y[k]$ presenta un pico.  
+\end{itemize}
+
+\subsubsection*{Ventajas de la implementación FIR}
+
+\begin{itemize}
+	\item \textbf{Estabilidad}: al no tener retroalimentación, un FIR no puede divergir.  
+	\item \textbf{Flexibilidad}: basta con cambiar los coeficientes $h[n]$ para adaptarse a otra señal patrón.  
+	\item \textbf{Eficiencia}: la operación es solo un producto punto, fácil de vectorizar o implementar en hardware (DSP/FPGA).  
+\end{itemize}
+
+En la práctica, algoritmos como la \emph{FFT-based convolution} permiten realizar la correlación de manera aún más eficiente cuando $N$ es grande.
+
+\subsection{Ejemplos y aplicaciones}
+
+\begin{itemize}
+	\item \textbf{Radar}: detección de ecos débiles con forma de pulso conocida.  
+	\item \textbf{Sonar}: localización de objetos bajo el agua mediante pulsos transmitidos.  
+	\item \textbf{Sismología}: identificación de terremotos pequeños correlando registros con formas de onda conocidas.  
+	\item \textbf{Bioacústica}: detección de patrones repetitivos (como zumbidos) en ambientes ruidosos.  
+\end{itemize}
+
+\subsection{Limitaciones}
+
+\begin{itemize}
+	\item Detecta eficazmente solo la señal exacta para la que fue diseñado.  
+	\item Variaciones de frecuencia o fase reducen su desempeño.  
+	\item Poco flexible en entornos con señales muy diversas o distorsionadas.  
+\end{itemize}
+
+\insertarfigura{fig/matched_filter_combined_final.png}{Ejemplo de filtrado adaptado (\emph{matched filtering}). 
+	Arriba se muestra una señal lineal-FM (chirp) contaminada con ruido, 
+	y abajo la salida del filtro adaptado. 
+	Se observa cómo el filtro maximiza la SNR al alinear la señal con su versión invertida y conjugada, 
+	produciendo un pico bien definido en la detección. 
+	La curva azul corresponde al filtrado sin ponderación espectral y la roja al uso de una ventana de Taylor para reducir lóbulos secundarios \cite{Bancroft2002}.}{fig:matched:example}{1}
+
+
+\subsection{Relevancia y aplicaciones}
+
+El interés en los \textbf{filtros adaptados} no se limita a su formulación matemática, 
+sino al problema concreto que abordan: \textbf{detectar señales de interés inmersas en ruido}.  
+En el análisis de audio esto es especialmente relevante, ya que muchos fenómenos acústicos 
+—desde el zumbido de un mosquito hasta el pulso de un sonar o la voz humana— 
+pueden modelarse como señales conocidas que deben extraerse de un entorno contaminado.
+
+La pregunta central es: \textit{¿cómo identificar de manera confiable la presencia de una señal 
+	cuando su amplitud es comparable o incluso menor que el ruido?}.  
+El matched filter ofrece una respuesta óptima en este escenario, 
+maximizando la relación señal--ruido en el instante de detección.  
+
+Comparado con otras técnicas, un matched filter es más eficiente y directo 
+cuando la forma de la señal es conocida con precisión, 
+aunque pierde flexibilidad ante variaciones en frecuencia, fase o distorsiones.  
+Por ello, en contextos con señales bien caracterizadas (radar, sonar, pulsos médicos) 
+suele ser superior, mientras que en escenarios más inciertos conviene complementarlo 
+con métodos adaptativos o de aprendizaje automático.
+
+Más allá de la detección de mosquitos, la misma técnica se utiliza en \textbf{radar} para localizar blancos, 
+en \textbf{sonar} para explorar el medio submarino, en \textbf{sismología} para identificar micro-terremotos, 
+y en \textbf{biomedicina} para detectar patrones electrofisiológicos en señales débiles.  
+En todos estos casos, la lógica es la misma: diseñar un filtro que \emph{se parezca} a la señal buscada 
+y que, al correlacionarla con los datos, produzca un pico inequívoco en la salida.
+
+De esta forma, el matched filter se convierte en un bloque fundamental de los sistemas de detección: 
+es simple de implementar, óptimo bajo supuestos de ruido blanco, y sirve como punto de comparación 
+frente a técnicas más complejas.  
+Su valor está en mostrar cómo, con herramientas clásicas, ya es posible resolver un problema 
+que sigue siendo central en múltiples ámbitos del procesamiento de señales.

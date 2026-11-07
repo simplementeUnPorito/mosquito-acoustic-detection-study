@@ -1,0 +1,13 @@
+Copyright (c) 2025 Elías David Álvarez Martínez
+
+The text of the paper (paper/*.tex, docs/*.pdf) and the author's own figures
+(paper/fig/DAS.png, CAPON.png, MUSIC.png, MUSIC-SS.png, comparativoDOA.png)
+are licensed under the Creative Commons Attribution 4.0 International License
+(CC BY 4.0): https://creativecommons.org/licenses/by/4.0/legalcode
+
+Figures reproduced from cited literature remain the property of their
+original sources and are NOT covered by this license; see the figure
+captions and bibliography in the paper.
+
+This repository contains no source code. Any code added in the future is
+released under the MIT License.
