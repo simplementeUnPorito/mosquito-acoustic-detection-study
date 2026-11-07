@@ -14,6 +14,14 @@ Mosquitoes transmit diseases such as dengue, Zika and malaria, and acoustic moni
 
 📄 Technical report: [`docs/mosquito-acoustic-detection-study.pdf`](docs/mosquito-acoustic-detection-study.pdf) (Spanish)
 
+### Recovered implementation history: "Libélula" (2025)
+Before this literature and simulation study, the project had a hands-on phase code-named *Libélula*: data-processing workflows built in KNIME around the HumBugDB mosquito-flight-tone dataset, and a modernized version of the HumBugDB CNN (Kiskin et al.). From the surviving report, that phase:
+- ported the reference CNN (64×64 mel-spectrogram input, four convolutional stages, 128-unit dense layer, two-class softmax) from TensorFlow 1.14 / Keras 2.2.4 to TensorFlow 2.19 / Keras 3.9;
+- made the custom dropout layer serializable, added safe model loading and the `.keras` format, and enabled dynamic GPU memory growth;
+- cut training time from 14–17 min per epoch on CPU to about 1.5 min per epoch on GPU.
+
+The KNIME workflows and the migrated code were lost; only the report survives, so no classification metrics are claimed here.
+
 ### What the study covers
 | Topic | Content |
 |-------|---------|
@@ -74,6 +82,9 @@ Text and the author's own figures: CC BY 4.0 (see `LICENSE`). Figures reproduced
 Los mosquitos transmiten enfermedades como dengue, zika y malaria, y el monitoreo acústico es una alternativa de bajo costo y no invasiva para detectarlos y seguirlos. Esta revisión de autoría individual (IEEEtran, 13 páginas, en español) recorre el camino desde el procesamiento de señales clásico hasta pipelines híbridos: PLL y filtros casados para detección, estimación de dirección de arribo (DoA) para localización, redes convolucionales y bayesianas para ganar robustez ante el ruido, y aceleradores FPGA como vía hacia la implementación en tiempo real a bordo (drones, nodos IoT). El aporte es una síntesis orientada a decisiones: criterios para elegir tecnología según el objetivo operativo (vigilancia vs. intercepción), las condiciones acústicas y el presupuesto computacional.
 
 📄 Documento: [`docs/mosquito-acoustic-detection-study.pdf`](docs/mosquito-acoustic-detection-study.pdf)
+
+### Historia recuperada: "Libélula" (2025)
+Antes de este estudio, el proyecto tuvo una etapa práctica llamada *Libélula*: flujos de procesamiento en KNIME sobre el dataset HumBugDB y la modernización de la CNN de HumBugDB (Kiskin et al.), migrada de TensorFlow 1.14 / Keras 2.2.4 a TensorFlow 2.19 / Keras 3.9, con dropout serializable, carga segura del modelo, formato `.keras` y uso dinámico de GPU (de 14–17 min por época en CPU a ~1,5 min en GPU). Los workflows de KNIME y el código migrado se perdieron; solo se conserva el informe, por lo que no se reportan métricas de clasificación.
 
 ### Contenido
 PLL, filtros casados, DoA (delay-and-sum, Capon/MVDR, MUSIC, ESPRIT), CNN sobre HumBugDB con inferencia bayesiana por MC-Dropout y aceleración en FPGA. Ver la tabla, el diagrama y el árbol de la sección en inglés.
