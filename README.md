@@ -58,11 +58,11 @@ Build the report from `report/` with a TeX distribution that includes IEEEtran (
 Delay-and-sum, Capon, MUSIC and a combined comparison, simulated for three sources at 30°, 50° and 70°, SNR 5 dB and a 10-sensor uniform linear array with normalized spacing 0.5.
 
 <table><tr>
-<td align="center" width="50%"><img src="report/fig/DAS.png" width="420" alt="DAS spatial spectrum"><br><sub>Delay-and-sum spatial spectrum</sub></td>
-<td align="center" width="50%"><img src="report/fig/CAPON.png" width="420" alt="Capon (MVDR) spatial spectrum"><br><sub>Capon (MVDR) spatial spectrum</sub></td>
+<td align="center" width="50%"><img src="docs/img/doa/das.png" width="420" alt="DAS spatial spectrum"><br><sub>Delay-and-sum spatial spectrum (dB vs. angle, °)</sub></td>
+<td align="center" width="50%"><img src="docs/img/doa/capon.png" width="420" alt="Capon (MVDR) spatial spectrum"><br><sub>Capon (MVDR) spatial spectrum (dB vs. angle, °)</sub></td>
 </tr><tr>
-<td align="center" width="50%"><img src="report/fig/MUSIC.png" width="420" alt="MUSIC spatial spectrum"><br><sub>MUSIC spatial spectrum</sub></td>
-<td align="center" width="50%"><img src="report/fig/comparativoDOA.png" width="420" alt="Comparison of DAS, Capon, MUSIC, MUSIC with spatial smoothing, Root-MUSIC and ESPRIT"><br><sub>DAS, Capon, MUSIC, MUSIC+SS, Root-MUSIC and ESPRIT compared</sub></td>
+<td align="center" width="50%"><img src="docs/img/doa/music.png" width="420" alt="MUSIC spatial spectrum"><br><sub>MUSIC pseudo-spectrum (dB vs. angle, °)</sub></td>
+<td align="center" width="50%"><img src="docs/img/doa/comparativodoa.png" width="420" alt="Comparison of DAS, Capon, MUSIC, MUSIC with spatial smoothing, Root-MUSIC and ESPRIT"><br><sub>DAS, Capon, MUSIC, MUSIC+SS, Root-MUSIC and ESPRIT compared</sub></td>
 </tr></table>
 
 Only the author's own simulation figures are shown here. Other figures in the report are reproduced from the cited sources and belong to them.
