@@ -81,19 +81,60 @@ Text and the author's own figures: CC BY 4.0 (see `LICENSE`). Figures reproduced
 ### Descripción
 Los mosquitos transmiten enfermedades como dengue, zika y malaria, y el monitoreo acústico es una alternativa de bajo costo y no invasiva para detectarlos y seguirlos. Este estudio independiente (IEEEtran, 13 páginas, en español) recorre el camino desde el procesamiento de señales clásico hasta pipelines híbridos: PLL y filtros casados para detección, estimación de dirección de arribo (DoA) para localización, redes convolucionales y bayesianas para ganar robustez ante el ruido, y aceleradores FPGA como vía hacia la implementación en tiempo real a bordo (drones, nodos IoT). El aporte es una síntesis orientada a decisiones: criterios para elegir tecnología según el objetivo operativo (vigilancia vs. intercepción), las condiciones acústicas y el presupuesto computacional.
 
-📄 Documento: [`docs/mosquito-acoustic-detection-study.pdf`](docs/mosquito-acoustic-detection-study.pdf)
+📄 Informe técnico: [`docs/mosquito-acoustic-detection-study.pdf`](docs/mosquito-acoustic-detection-study.pdf) (español)
 
 ### Historia recuperada: "Libélula" (2025)
-Antes de este estudio, el proyecto tuvo una etapa práctica llamada *Libélula*: flujos de procesamiento en KNIME sobre el dataset HumBugDB y la modernización de la CNN de HumBugDB (Kiskin et al.), migrada de TensorFlow 1.14 / Keras 2.2.4 a TensorFlow 2.19 / Keras 3.9, con dropout serializable, carga segura del modelo, formato `.keras` y uso dinámico de GPU (de 14–17 min por época en CPU a ~1,5 min en GPU). Los workflows de KNIME y el código migrado se perdieron; solo se conserva el informe, por lo que no se reportan métricas de clasificación.
+Antes de este estudio bibliográfico y de simulación, el proyecto tuvo una etapa práctica con el nombre clave *Libélula*: flujos de procesamiento en KNIME sobre el conjunto de tonos de vuelo de mosquitos HumBugDB y una versión modernizada de la CNN de HumBugDB (Kiskin et al.). Según el informe que se conserva, esa etapa:
+- migró la CNN de referencia (entrada de espectrograma mel de 64×64, cuatro etapas convolucionales, capa densa de 128 unidades, softmax de dos clases) de TensorFlow 1.14 / Keras 2.2.4 a TensorFlow 2.19 / Keras 3.9;
+- hizo serializable la capa dropout personalizada, agregó carga segura del modelo y el formato `.keras`, y habilitó el crecimiento dinámico de la memoria de GPU;
+- redujo el tiempo de entrenamiento de 14 a 17 min por época en CPU a aproximadamente 1,5 min por época en GPU.
 
-### Contenido
-PLL, filtros casados, DoA (delay-and-sum, Capon/MVDR, MUSIC, ESPRIT), CNN sobre HumBugDB con inferencia bayesiana por MC-Dropout y aceleración en FPGA. Ver la tabla, el diagrama y el árbol de la sección en inglés.
+Los flujos de KNIME y el código migrado se perdieron; solo se conserva el informe, por lo que aquí no se presentan métricas de clasificación.
+
+### Qué cubre el estudio
+| Tema | Contenido |
+|-------|---------|
+| Bancos de PLL | Estructura y modelo lineal de una PLL de segundo orden; bancos de PLL para seguir componentes tonales del batido de alas |
+| Filtros casados | Filtrado casado de un chirp FM lineal ruidoso, aplicación de ventana (Taylor) para reducir lóbulos laterales |
+| Estimación DoA | Modelo de onda plana y arreglo de sensores; delay-and-sum (DAS), Capon/MVDR, MUSIC (con suavizado espacial), ESPRIT |
+| Aprendizaje profundo | Front-ends FFT, STFT y espectrograma mel; CNN sobre HumBugDB; inferencia bayesiana con MC-Dropout; combinación de DL con DoA |
+| Aceleración FPGA | Paralelismo y compromisos de recursos para inferencia en tiempo real sobre plataformas embebidas de bajo consumo |
+
+### Pipeline
+```mermaid
+flowchart LR
+  A[Arreglo de micrófonos] --> B[Preprocesamiento: FFT / STFT / mel]
+  B --> C{Detección}
+  C --> C1[Banco de PLL]
+  C --> C2[Filtro casado]
+  C --> C3[CNN + MC-Dropout]
+  C1 --> D[DoA: DAS / Capon / MUSIC / ESPRIT]
+  C2 --> D
+  C3 --> D
+  D --> E[Implementación FPGA en tiempo real]
+```
+
+### Estructura del repositorio
+```
+report/   Fuentes LaTeX (main.tex + un archivo por sección) y fig/
+docs/     Informe compilado (PDF) y banner
+```
+
+### Primeros pasos
+Compilar el informe desde `report/` con una distribución TeX que incluya IEEEtran (por ejemplo, MiKTeX o TeX Live): `pdflatex main.tex` (ejecutar dos veces). La bibliografía está incorporada en `biblio.tex`.
 
 ### Resultados
-Las figuras de arriba son simulaciones propias (tres fuentes en 30°, 50° y 70°, SNR 5 dB, arreglo lineal uniforme de 10 sensores con espaciamiento normalizado 0,5). Las demás figuras del informe están reproducidas de las fuentes citadas y pertenecen a ellas.
+Delay-and-sum, Capon, MUSIC y una comparación combinada, simulados para tres fuentes en 30°, 50° y 70°, SNR 5 dB y un arreglo lineal uniforme de 10 sensores con espaciamiento normalizado 0,5.
 
-### Compilación
-Desde `report/`: `pdflatex main.tex` (dos veces). La bibliografía está en `biblio.tex`.
+<table><tr>
+<td align="center" width="50%"><img src="docs/img/doa/das.png" width="420" alt="Espectro espacial DAS"><br><sub>Espectro espacial delay-and-sum (dB frente a ángulo, °)</sub></td>
+<td align="center" width="50%"><img src="docs/img/doa/capon.png" width="420" alt="Espectro espacial Capon (MVDR)"><br><sub>Espectro espacial Capon (MVDR) (dB frente a ángulo, °)</sub></td>
+</tr><tr>
+<td align="center" width="50%"><img src="docs/img/doa/music.png" width="420" alt="Espectro espacial MUSIC"><br><sub>Pseudoespectro MUSIC (dB frente a ángulo, °)</sub></td>
+<td align="center" width="50%"><img src="docs/img/doa/comparativodoa.png" width="420" alt="Comparación de DAS, Capon, MUSIC, MUSIC con suavizado espacial, Root-MUSIC y ESPRIT"><br><sub>Comparación de DAS, Capon, MUSIC, MUSIC+SS, Root-MUSIC y ESPRIT</sub></td>
+</tr></table>
+
+Aquí solo se muestran las figuras de simulación propias del autor. Las demás figuras del informe se reproducen de las fuentes citadas y pertenecen a ellas.
 
 ### Autor
 Elías David Álvarez Martínez, Ingeniería Electrónica, Universidad Católica "Nuestra Señora de la Asunción" (Paraguay), 2025.
